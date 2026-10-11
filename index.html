@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Quiz Generator | Board Exam Prep</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="background-decorations" aria-hidden="true">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header Section -->
+    <header class="app-header">
+      <div class="header-top-row">
+        <!-- Streak & Activity Counter -->
+        <div class="streak-badge" id="streakBadge" title="Your daily study streak">
+          <span class="streak-fire">🔥</span>
+          <span id="streakDaysText">1 Day Streak</span>
+          <span class="streak-divider">&bull;</span>
+          <span id="quizzesCompletedText">0 Quizzes</span>
+        </div>
+
+        <!-- Navigation Tools: Dashboard, Create Quiz, Leaderboard & API Key -->
+        <div class="header-tools">
+          <button type="button" class="tool-btn active-nav" id="openGeneratorBtn" title="Create Quiz">
+            <span>✨ Quiz Generator</span>
+          </button>
+
+          <button type="button" class="tool-btn" id="openDashboardBtn" title="View Performance Dashboard">
+            <span>📊 Dashboard</span>
+          </button>
+          
+          <button type="button" class="tool-btn" id="openLeaderboardBtn" title="View Quiz Leaderboard">
+            <span>🏆 Leaderboard</span>
+          </button>
+          
+          <div class="api-key-badge" id="apiKeyStatusBadge" title="Configure Gemini API Key">
+            <span class="api-status-dot" id="apiStatusDot"></span>
+            <span id="apiStatusText">AI Ready</span>
+            <button type="button" class="api-settings-btn" id="openApiKeyModalBtn" aria-label="Configure API Key">⚙️</button>
+          </div>
+        </div>
+      </div>
+
+      <h1 class="main-title">AI Board Exam Quiz Generator</h1>
+      <p class="subtitle">Select your subject, chapter topic, and difficulty to generate an intelligent Gemini AI assessment in real time.</p>
+      
+      <!-- Notification Toast / Notice Bar -->
+      <div id="noticeToast" class="notice-toast hidden" role="alert">
+        <span class="notice-icon" id="noticeIcon">ℹ️</span>
+        <span class="notice-msg" id="noticeMsg">Notice message</span>
+        <button type="button" class="notice-close" id="closeNoticeBtn">✕</button>
+      </div>
+    </header>
+
+    <!-- SECTION 1: Generator Form View -->
+    <main class="quiz-card" id="formView">
+      <form id="quizForm" novalidate>
+        
+        <!-- Simplified API Key Box (No username, no password) -->
+        <div class="api-key-banner" id="apiKeyBanner">
+          <div class="api-banner-left">
+            <span class="banner-icon">🔑</span>
+            <div>
+              <strong>Gemini API Key (Optional)</strong>
+              <p>Add your API key for live AI generation. If omitted or under high demand, local curated questions will be used automatically.</p>
+            </div>
+          </div>
+          <div class="api-banner-input-wrap">
+            <input 
+              type="text" 
+              id="quickApiKeyInput" 
+              class="quick-key-input" 
+              placeholder="Paste Google AI Key (AIzaSy...)"
+              autocomplete="off"
+            >
+            <button type="button" class="save-key-btn" id="saveQuickKeyBtn">Apply Key</button>
+          </div>
+        </div>
+
+        <!-- 1. Subject Selection -->
+        <section class="form-section">
+          <div class="section-label-row">
+            <span class="step-badge">1</span>
+            <div>
+              <label class="section-title">Select Subject</label>
+              <p class="section-hint">Choose your target discipline</p>
+            </div>
+          </div>
+
+          <div class="subject-grid" role="radiogroup" aria-label="Subject Selection">
+            <!-- Physics -->
+            <label class="subject-card active" data-subject="physics">
+              <input type="radio" name="subject" value="physics" checked>
+              <div class="subject-icon-box physics-bg">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(30 12 12)"></ellipse>
+                  <ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(-30 12 12)"></ellipse>
+                </svg>
+              </div>
+              <div class="subject-info">
+                <span class="subject-name">Physics</span>
+                <span class="subject-meta">Mechanics, Optics & Electromagnetism</span>
+              </div>
+              <div class="selection-check">✓</div>
+            </label>
+
+            <!-- Chemistry -->
+            <label class="subject-card" data-subject="chemistry">
+              <input type="radio" name="subject" value="chemistry">
+              <div class="subject-icon-box chemistry-bg">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 2v7.5l-5.5 9.5a2 2 0 0 0 1.7 3h11.6a2 2 0 0 0 1.7-3L14 9.5V2"></path>
+                  <line x1="8.5" y1="2" x2="15.5" y2="2"></line>
+                  <line x1="7" y1="14" x2="17" y2="14"></line>
+                </svg>
+              </div>
+              <div class="subject-info">
+                <span class="subject-name">Chemistry</span>
+                <span class="subject-meta">Organic, Physical & Inorganic</span>
+              </div>
+              <div class="selection-check">✓</div>
+            </label>
+
+            <!-- Mathematics -->
+            <label class="subject-card" data-subject="mathematics">
+              <input type="radio" name="subject" value="mathematics">
+              <div class="subject-icon-box math-bg">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="4" y1="9" x2="20" y2="9"></line>
+                  <line x1="4" y1="15" x2="20" y2="15"></line>
+                  <line x1="10" y1="3" x2="8" y2="21"></line>
+                  <line x1="16" y1="3" x2="14" y2="21"></line>
+                </svg>
+              </div>
+              <div class="subject-info">
+                <span class="subject-name">Mathematics</span>
+                <span class="subject-meta">Calculus, Vectors & Algebra</span>
+              </div>
+              <div class="selection-check">✓</div>
+            </label>
+          </div>
+        </section>
+
+        <!-- 2. Chapter & Topic Boxes Selection -->
+        <section class="form-section">
+          <div class="section-label-row">
+            <span class="step-badge">2</span>
+            <div>
+              <label class="section-title">Select Topic or Chapter</label>
+              <p class="section-hint">Click a popular topic box or pick from the full syllabus list</p>
+            </div>
+          </div>
+
+          <!-- Dynamic Popular Topic Boxes -->
+          <div class="topic-boxes-wrapper">
+            <span class="topic-boxes-label">🔥 Quick Pick Chapter Topics:</span>
+            <div class="topic-boxes-grid" id="topicBoxesContainer">
+              <!-- Rendered dynamically via JS based on selected subject -->
+            </div>
+          </div>
+
+          <div class="chapter-input-group">
+            <div class="select-wrapper">
+              <select id="chapterSelect" class="custom-select" required>
+                <option value="" disabled selected>-- Or select from full syllabus list --</option>
+              </select>
+              <div class="select-arrow">▼</div>
+            </div>
+
+            <div class="or-divider">
+              <span>OR CUSTOM TOPIC</span>
+            </div>
+
+            <div class="custom-input-wrapper">
+              <input 
+                type="text" 
+                id="customChapterInput" 
+                class="text-input" 
+                placeholder="Type any custom topic (e.g., Electromagnetic Induction, Integrals...)"
+                autocomplete="off"
+              >
+            </div>
+          </div>
+          <span class="error-msg" id="chapterError">Please select a topic box or enter a chapter</span>
+        </section>
+
+        <!-- 3. Difficulty Level & 4. Number of Questions -->
+        <div class="form-row-grid">
+          <!-- Difficulty -->
+          <section class="form-section">
+            <div class="section-label-row">
+              <span class="step-badge">3</span>
+              <div>
+                <label class="section-title">Difficulty Level</label>
+                <p class="section-hint">Set question complexity</p>
+              </div>
+            </div>
+
+            <div class="difficulty-grid" role="radiogroup" aria-label="Difficulty Level">
+              <label class="diff-card" data-diff="easy">
+                <input type="radio" name="difficulty" value="easy">
+                <span class="diff-indicator easy-dot"></span>
+                <span class="diff-text">Easy</span>
+                <span class="diff-sub">Fundamental Concepts</span>
+              </label>
+
+              <label class="diff-card active" data-diff="medium">
+                <input type="radio" name="difficulty" value="medium" checked>
+                <span class="diff-indicator medium-dot"></span>
+                <span class="diff-text">Medium</span>
+                <span class="diff-sub">Standard Board</span>
+              </label>
+
+              <label class="diff-card" data-diff="hard">
+                <input type="radio" name="difficulty" value="hard">
+                <span class="diff-indicator hard-dot"></span>
+                <span class="diff-text">Hard</span>
+                <span class="diff-sub">HOTS & Numericals</span>
+              </label>
+            </div>
+          </section>
+
+          <!-- Number of Questions -->
+          <section class="form-section">
+            <div class="section-label-row">
+              <span class="step-badge">4</span>
+              <div>
+                <label class="section-title">Number of Questions</label>
+                <p class="section-hint">Choose assessment length</p>
+              </div>
+            </div>
+
+            <div class="question-count-grid" role="radiogroup" aria-label="Number of Questions">
+              <label class="count-card">
+                <input type="radio" name="questionCount" value="5">
+                <span class="count-number">5</span>
+                <span class="count-label">Questions</span>
+                <span class="time-estimate">~ 8 mins</span>
+              </label>
+
+              <label class="count-card active">
+                <input type="radio" name="questionCount" value="10" checked>
+                <span class="count-number">10</span>
+                <span class="count-label">Questions</span>
+                <span class="time-estimate">~ 15 mins</span>
+              </label>
+
+              <label class="count-card">
+                <input type="radio" name="questionCount" value="20">
+                <span class="count-number">20</span>
+                <span class="count-label">Questions</span>
+                <span class="time-estimate">~ 30 mins</span>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <!-- Live Summary Strip -->
+        <div class="summary-preview">
+          <div class="summary-header">
+            <span class="summary-title">Quiz Configuration Preview:</span>
+          </div>
+          <div class="summary-tags">
+            <div class="summary-tag">
+              <span class="tag-label">Subject:</span>
+              <strong id="previewSubject">Physics</strong>
+            </div>
+            <div class="summary-tag">
+              <span class="tag-label">Chapter:</span>
+              <strong id="previewChapter">Not Selected</strong>
+            </div>
+            <div class="summary-tag">
+              <span class="tag-label">Difficulty:</span>
+              <strong id="previewDifficulty" class="capitalize">Medium</strong>
+            </div>
+            <div class="summary-tag">
+              <span class="tag-label">Questions:</span>
+              <strong id="previewCount">10 Qs</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-section">
+          <button type="submit" id="generateBtn" class="generate-btn">
+            <span class="btn-sparkle">✨</span>
+            <span class="btn-text">Generate Quiz</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <!-- SECTION 2: AI Loading Screen View (With 10s Countdown & Local Fallback) -->
+    <section class="quiz-card loading-view hidden" id="loadingView" aria-live="polite">
+      <div class="loading-container">
+        <div class="ai-pulse-loader">
+          <div class="pulse-ring ring-1"></div>
+          <div class="pulse-ring ring-2"></div>
+          <div class="ai-core-icon">✨</div>
+        </div>
+        <h2 class="loading-title" id="loadingTitle">Gemini AI is Generating Your Quiz...</h2>
+        <p class="loading-subtitle" id="loadingSubtitle">
+          Waiting for Google Gemini AI (<span id="countdownTimer">10s</span> timeout)
+        </p>
+
+        <!-- Timeout Countdown Progress Bar -->
+        <div class="timeout-bar-track">
+          <div class="timeout-bar-fill" id="timeoutBarFill"></div>
+        </div>
+
+        <div class="loading-steps">
+          <div class="step-item step-done" id="loadStep1">
+            <span class="step-check">✓</span>
+            <span>Targeting syllabus topic</span>
+          </div>
+          <div class="step-item step-active" id="loadStep2">
+            <span class="step-check">⏳</span>
+            <span>Drafting structured MCQs & options</span>
+          </div>
+          <div class="step-item" id="loadStep3">
+            <span class="step-check">○</span>
+            <span>Verifying answer key & explanations</span>
+          </div>
+        </div>
+
+        <!-- High Demand Manual Switch Button -->
+        <div class="high-demand-action">
+          <p class="high-demand-text">High API traffic? Skip the wait instantly:</p>
+          <button type="button" class="fallback-btn" id="forceLocalBtn">
+            ⚡ Switch to Curated Local Questions Now
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Interactive Quiz Player View -->
+    <section class="quiz-card player-view hidden" id="quizPlayerView">
+      <!-- Player Header -->
+      <div class="player-header">
+        <div class="quiz-meta-info">
+          <span class="meta-badge" id="quizMetaSubject">Physics</span>
+          <span class="meta-badge-outline" id="quizMetaChapter">Chapter</span>
+          <span class="meta-badge-diff" id="quizMetaDifficulty">Medium</span>
+          <span class="source-badge" id="quizMetaSource">🤖 Gemini AI</span>
+        </div>
+        <div class="player-header-right">
+          <label class="instant-mode-toggle" title="Show explanation immediately upon picking an option">
+            <input type="checkbox" id="instantFeedbackCheckbox">
+            <span>Instant Feedback</span>
+          </label>
+          <div class="quiz-timer-box">
+            <span class="timer-icon">⏱</span>
+            <span id="quizTimerText">00:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="quiz-progress-track">
+        <div class="quiz-progress-fill" id="quizProgressFill" style="width: 10%;"></div>
+      </div>
+
+      <div class="player-status-row">
+        <span class="q-counter" id="questionCounterText">Question 1 of 10</span>
+        <span class="answered-counter" id="answeredCounterText">0 Answered</span>
+      </div>
+
+      <!-- Question Navigation Palette -->
+      <div class="question-palette" id="questionPalette" aria-label="Question Navigation Dots">
+        <!-- Rendered dynamically via JS -->
+      </div>
+
+      <!-- Active Question Box -->
+      <div class="question-display-area">
+        <div class="question-badge-row">
+          <span class="q-badge" id="activeQBadge">Q1</span>
+          <span class="topic-tag-badge" id="activeQTopicTag">Topic</span>
+        </div>
+        <h2 class="question-text" id="questionText">Loading question text...</h2>
+
+        <!-- 4 Options Grid -->
+        <div class="options-container" id="optionsContainer">
+          <!-- Options rendered via JS -->
+        </div>
+
+        <!-- Interactive Instant Feedback Explanation Box -->
+        <div class="explanation-box hidden" id="explanationBox">
+          <div class="explanation-header">
+            <span class="exp-icon" id="expResultIcon">💡</span>
+            <strong id="expResultTitle">Explanation:</strong>
+          </div>
+          <p id="explanationText"></p>
+        </div>
+      </div>
+
+      <!-- Player Controls -->
+      <div class="player-controls">
+        <button type="button" class="ctrl-btn secondary-btn" id="prevQuestionBtn">
+          ← Previous
+        </button>
+        <button type="button" class="ctrl-btn secondary-btn" id="quitQuizBtn">
+          Exit Quiz
+        </button>
+        <button type="button" class="ctrl-btn primary-btn" id="nextQuestionBtn">
+          Next Question →
+        </button>
+        <button type="button" class="ctrl-btn submit-quiz-btn hidden" id="submitQuizBtn">
+          Submit & View Score ✓
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Quiz Results & Scorecard View -->
+    <section class="quiz-card results-view hidden" id="quizResultsView">
+      <div class="results-header">
+        <div class="result-badge-icon" id="resultTrophyIcon">🏆</div>
+        <h2 class="result-title">Quiz Completed!</h2>
+        <p class="result-subtitle" id="resultSubtitle">Here is your performance breakdown</p>
+      </div>
+
+      <!-- Score Summary Cards -->
+      <div class="score-cards-grid">
+        <div class="score-stat-card primary-stat">
+          <span class="stat-number" id="scoreFraction">8 / 10</span>
+          <span class="stat-label">Total Score</span>
+        </div>
+        <div class="score-stat-card">
+          <span class="stat-number" id="scorePercentage">80%</span>
+          <span class="stat-label">Accuracy</span>
+        </div>
+        <div class="score-stat-card">
+          <span class="stat-number" id="timeTakenText">02:45</span>
+          <span class="stat-label">Time Spent</span>
+        </div>
+      </div>
+
+      <!-- Dynamic Difficulty Adjustment Recommendation Card -->
+      <div class="difficulty-recommendation-card" id="diffRecCard">
+        <div class="diff-rec-left">
+          <span class="rec-icon">⚡</span>
+          <div>
+            <strong id="diffRecTitle">Smart Difficulty Adjustment</strong>
+            <p id="diffRecDesc">Based on your performance, we recommend adjusting your difficulty.</p>
+          </div>
+        </div>
+        <button type="button" class="rec-action-btn" id="applyDiffRecBtn">
+          Apply Recommendation
+        </button>
+      </div>
+
+      <!-- Weak Topics & Focus Areas Summary -->
+      <div class="weak-topics-card" id="weakTopicsCard">
+        <div class="weak-topics-header">
+          <span class="wt-icon">🎯</span>
+          <div>
+            <h3 class="wt-title">Concept & Weak Topics Summary</h3>
+            <p class="wt-desc">Targeted revision recommendations based on your incorrect answers</p>
+          </div>
+        </div>
+        <div class="weak-topics-list" id="weakTopicsList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Action & Export Buttons -->
+      <div class="results-actions">
+        <button type="button" class="tool-btn highlight-btn" id="resultsViewDashboardBtn">
+          📊 View Performance Dashboard
+        </button>
+        <button type="button" class="primary-btn" id="newQuizBtn">
+          ✨ Generate New Quiz
+        </button>
+        <button type="button" class="secondary-btn" id="retakeQuizBtn">
+          🔄 Retake This Quiz
+        </button>
+        <button type="button" class="export-btn" id="exportTxtBtn" title="Download text report">
+          📥 Export Results (.txt)
+        </button>
+        <button type="button" class="export-btn" id="printReportBtn" title="Print or save as PDF">
+          🖨️ Print / Save PDF
+        </button>
+      </div>
+
+      <!-- Detailed Review List -->
+      <div class="review-section">
+        <h3 class="review-title">Detailed Solutions & Step-by-Step Explanations</h3>
+        <div class="review-list" id="reviewQuestionsList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Comprehensive Performance Dashboard View -->
+    <section class="quiz-card dashboard-view hidden" id="dashboardView">
+      <div class="dashboard-header">
+        <div class="dash-header-left">
+          <div class="dash-title-row">
+            <span class="dash-icon">📊</span>
+            <h2 class="dash-title">Student Mastery & Progress Dashboard</h2>
+          </div>
+          <p class="dash-subtitle">Track your board preparation metrics, subject progress bars, and weak topics</p>
+        </div>
+        <div class="dash-header-actions">
+          <button type="button" class="primary-btn" id="dashCreateQuizBtn">✨ Create New Quiz</button>
+          <button type="button" class="secondary-btn" id="dashDemoToggleBtn">Load Sample Analytics</button>
+        </div>
+      </div>
+
+      <!-- KPI Overview (4 Cards) -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Quizzes Completed</span>
+          <span class="kpi-val" id="dashTotalQuizzes">0</span>
+          <span class="kpi-sub" id="dashTotalQuestions">0 Questions Solved</span>
+        </div>
+        <div class="kpi-card highlight-stat">
+          <span class="kpi-label">Overall Accuracy</span>
+          <span class="kpi-val" id="dashAccuracy">0%</span>
+          <span class="kpi-sub" id="dashAccuracyTarget">Target: 85%+</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Study Streak</span>
+          <span class="kpi-val" id="dashStreak">1 Day 🔥</span>
+          <span class="kpi-sub" id="dashConsistency">Daily Active</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Total Time Practiced</span>
+          <span class="kpi-val" id="dashTotalTime">00:00</span>
+          <span class="kpi-sub">Total Duration</span>
+        </div>
+      </div>
+
+      <!-- Subject Mastery Progress Bars -->
+      <div class="dash-section">
+        <div class="dash-section-title-row">
+          <div>
+            <h3 class="dash-section-title">📚 Subject Mastery Progress Bars</h3>
+            <span class="dash-section-hint">Continuous mastery tracking across board exam subjects</span>
+          </div>
+        </div>
+
+        <div class="subject-mastery-grid">
+          <!-- Physics Mastery -->
+          <div class="subject-mastery-card physics-card">
+            <div class="sm-card-header">
+              <div class="sm-title-box">
+                <span class="sm-icon">⚡</span>
+                <div>
+                  <strong>Physics</strong>
+                  <span class="sm-sub" id="dashPhysicsQuestions">0 / 0 Solved</span>
+                </div>
+              </div>
+              <span class="sm-percent" id="dashPhysicsPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill physics-fill" id="dashPhysicsBar" style="width: 0%;"></div>
+            </div>
+            <div class="sm-footer">
+              <span class="sm-level" id="dashPhysicsLevel">Level: Unattempted</span>
+              <button type="button" class="sm-quick-btn" data-subject="physics">Practice Physics</button>
+            </div>
+          </div>
+
+          <!-- Chemistry Mastery -->
+          <div class="subject-mastery-card chemistry-card">
+            <div class="sm-card-header">
+              <div class="sm-title-box">
+                <span class="sm-icon">🧪</span>
+                <div>
+                  <strong>Chemistry</strong>
+                  <span class="sm-sub" id="dashChemistryQuestions">0 / 0 Solved</span>
+                </div>
+              </div>
+              <span class="sm-percent" id="dashChemistryPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill chemistry-fill" id="dashChemistryBar" style="width: 0%;"></div>
+            </div>
+            <div class="sm-footer">
+              <span class="sm-level" id="dashChemistryLevel">Level: Unattempted</span>
+              <button type="button" class="sm-quick-btn" data-subject="chemistry">Practice Chemistry</button>
+            </div>
+          </div>
+
+          <!-- Mathematics Mastery -->
+          <div class="subject-mastery-card math-card">
+            <div class="sm-card-header">
+              <div class="sm-title-box">
+                <span class="sm-icon">📐</span>
+                <div>
+                  <strong>Mathematics</strong>
+                  <span class="sm-sub" id="dashMathQuestions">0 / 0 Solved</span>
+                </div>
+              </div>
+              <span class="sm-percent" id="dashMathPercent">0%</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill math-fill" id="dashMathBar" style="width: 0%;"></div>
+            </div>
+            <div class="sm-footer">
+              <span class="sm-level" id="dashMathLevel">Level: Unattempted</span>
+              <button type="button" class="sm-quick-btn" data-subject="mathematics">Practice Math</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Difficulty Breakdown Progress Bars -->
+      <div class="dash-section">
+        <div class="dash-section-title-row">
+          <div>
+            <h3 class="dash-section-title">⚡ Difficulty Breakdown Progress</h3>
+            <span class="dash-section-hint">Performance by question complexity level</span>
+          </div>
+        </div>
+
+        <div class="difficulty-bars-grid">
+          <div class="diff-bar-item">
+            <div class="diff-bar-label-row">
+              <span class="diff-title-dot easy-dot"></span>
+              <span>Easy (Foundations)</span>
+              <strong id="dashEasyPercent">0%</strong>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill easy-fill" id="dashEasyBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="diff-bar-item">
+            <div class="diff-bar-label-row">
+              <span class="diff-title-dot medium-dot"></span>
+              <span>Medium (Standard Board)</span>
+              <strong id="dashMediumPercent">0%</strong>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill medium-fill" id="dashMediumBar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <div class="diff-bar-item">
+            <div class="diff-bar-label-row">
+              <span class="diff-title-dot hard-dot"></span>
+              <span>Hard (HOTS & Numericals)</span>
+              <strong id="dashHardPercent">0%</strong>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill hard-fill" id="dashHardBar" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Persistent Weak Topics & Revision Guide -->
+      <div class="dash-section">
+        <div class="dash-section-title-row">
+          <div class="dash-title-with-badge">
+            <h3 class="dash-section-title">🎯 Priority Weak Topics & Actionable Formula Revision</h3>
+            <span class="badge-count" id="dashWeakCount">0 Topics</span>
+          </div>
+          <span class="dash-section-hint">Topics with accuracy under 70% requiring dedicated revision</span>
+        </div>
+
+        <div class="dash-weak-list" id="dashWeakList">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Mastered Topics -->
+      <div class="dash-section">
+        <div class="dash-section-title-row">
+          <div>
+            <h3 class="dash-section-title">🏆 Strong & Mastered Topics</h3>
+            <span class="dash-section-hint">Topics with 80%+ accuracy</span>
+          </div>
+        </div>
+        <div class="dash-mastered-chips" id="dashMasteredList">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Dashboard Footer Actions -->
+      <div class="dash-footer-row">
+        <button type="button" class="secondary-btn" id="dashClearStatsBtn">🗑️ Reset Dashboard Analytics</button>
+        <button type="button" class="primary-btn" id="dashBottomQuizBtn">✨ Create Practice Quiz</button>
+      </div>
+    </section>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="lbModalHeading">
+      <div class="modal-card leaderboard-modal-card">
+        <button class="modal-close-btn" id="closeLeaderboardBtn" aria-label="Close modal">✕</button>
+        
+        <div class="modal-status-icon">🏆</div>
+        <h3 id="lbModalHeading">Quiz Practice Leaderboard</h3>
+        <p class="modal-desc">Your recorded test scores and mastery history</p>
+        
+        <div class="leaderboard-table-wrap">
+          <table class="leaderboard-table" id="leaderboardTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Subject & Topic</th>
+                <th>Difficulty</th>
+                <th>Score</th>
+                <th>Time</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="modal-actions lb-actions">
+          <button type="button" class="secondary-btn" id="clearLeaderboardBtn">Clear History</button>
+          <button type="button" class="primary-btn" id="closeLbActionBtn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Key Settings Modal (No username, no password) -->
+    <div id="apiKeyModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="apiModalHeading">
+      <div class="modal-card">
+        <button class="modal-close-btn" id="closeApiKeyModalBtn" aria-label="Close modal">✕</button>
+        
+        <div class="modal-status-icon">🔑</div>
+        <h3 id="apiModalHeading">Gemini API Key Setting</h3>
+        <p class="modal-desc">Direct key input. No login, username, or password needed.</p>
+        
+        <div class="api-modal-body">
+          <label for="modalApiKeyInput" class="modal-input-label">API Key</label>
+          <div class="key-input-row">
+            <input 
+              type="text" 
+              id="modalApiKeyInput" 
+              class="text-input" 
+              placeholder="Paste Google AI Studio Key (AIzaSy...)" 
+              autocomplete="off"
+            >
+          </div>
+          <p class="key-help-text">
+            Free key available at <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
+          </p>
+          <p class="key-help-text">
+            If left empty or if demand exceeds limits, the app automatically runs in <strong>Local Question Bank Mode</strong>.
+          </p>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="primary-btn" id="saveModalKeyBtn">Save Key</button>
+          <button type="button" class="secondary-btn" id="clearKeyBtn">Clear Key</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>AI Board Exam Practice Application &bull; Dual Engine: Google Gemini Flash & Local Curated Bank</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
