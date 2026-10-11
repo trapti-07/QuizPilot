@@ -10,37 +10,74 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Base allowed origins for local development
-const allowedOrigins = [
+// Helper functions for origin normalization and hostname extraction
+const normalizeOrigin = (urlStr) => {
+  if (!urlStr || typeof urlStr !== 'string') return '';
+  return urlStr.trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '').toLowerCase();
+};
+
+const extractHost = (urlStr) => {
+  try {
+    const withProto = /^https?:\/\//i.test(urlStr) ? urlStr : `https://${urlStr}`;
+    return new URL(withProto).hostname.toLowerCase();
+  } catch {
+    return '';
+  }
+};
+
+// Base allowed origins and hosts for local development
+const allowedOrigins = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:3000',
-];
+  'http://127.0.0.1:3000',
+]);
+const allowedHosts = new Set(['localhost', '127.0.0.1']);
 
 // Allow deployed frontend origin via FRONTEND_URL or CLIENT_URL (supports comma-separated list)
 const configuredFrontend = process.env.FRONTEND_URL || process.env.CLIENT_URL;
 if (configuredFrontend) {
-  const customOrigins = configuredFrontend.split(',').map((u) => u.trim().replace(/\/+$/, ''));
-  customOrigins.forEach((orig) => {
-    if (orig && !allowedOrigins.includes(orig)) {
-      allowedOrigins.push(orig);
+  const customEntries = configuredFrontend.split(',').map(normalizeOrigin).filter(Boolean);
+  customEntries.forEach((entry) => {
+    allowedOrigins.add(entry);
+    if (!/^https?:\/\//i.test(entry)) {
+      allowedOrigins.add(`https://${entry}`);
+      allowedOrigins.add(`http://${entry}`);
+    } else {
+      allowedOrigins.add(entry.replace(/^https?:\/\//i, ''));
+    }
+    const host = extractHost(entry);
+    if (host) {
+      allowedHosts.add(host);
     }
   });
 }
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  const cleanOrigin = normalizeOrigin(origin);
+  if (allowedOrigins.has(cleanOrigin)) return true;
+
+  const originHost = extractHost(cleanOrigin);
+  if (originHost && allowedHosts.has(originHost)) return true;
+
+  return false;
+};
 
 // Enable CORS for allowed origins with credentials
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests without Origin header (e.g. mobile apps, curl, server health checks)
-    if (!origin) {
+    if (!origin || isOriginAllowed(origin)) {
       return callback(null, true);
     }
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error(`CORS blocked for unauthorized origin: ${origin}`));
+    console.warn(`[CORS Blocked] Unauthorized origin: ${origin}`);
+    return callback(null, false);
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200,
 }));
 
 // Body parser

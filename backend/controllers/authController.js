@@ -21,7 +21,10 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password, confirmPassword } = req.body;
 
-    if (!name || !email || !password || !confirmPassword) {
+    const trimmedName = (name || '').trim();
+    const normalizedEmail = (email || '').toLowerCase().trim();
+
+    if (!trimmedName || !normalizedEmail || !password || !confirmPassword) {
       return res.status(400).json({
         success: false,
         message: 'All fields (Full name, email, password, confirm password) are required.',
@@ -43,14 +46,13 @@ exports.register = async (req, res) => {
     }
 
     const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
         message: 'Please provide a valid email address.',
       });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
     const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(409).json({
@@ -90,6 +92,12 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.error('[Register Error]', error);
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'An account with this email address already exists. Please log in.',
+      });
+    }
     return res.status(500).json({
       success: false,
       message: 'Server error during registration.',
