@@ -1,7 +1,22 @@
 import axios from 'axios';
 
+// Resolve API base URL:
+// - In production, uses import.meta.env.VITE_API_URL (e.g. deployed Render backend)
+// - In local development without VITE_API_URL, defaults to '/api' to use Vite dev proxy
+// - Automatically normalizes trailing slashes and ensures '/api' is present exactly once
+export const resolveApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl || !envUrl.trim()) {
+    return '/api';
+  }
+  const cleanUrl = envUrl.trim().replace(/\/+$/, '');
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

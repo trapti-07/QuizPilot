@@ -10,9 +10,36 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable CORS for frontend
+// Base allowed origins for local development
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+];
+
+// Allow deployed frontend origin via FRONTEND_URL or CLIENT_URL (supports comma-separated list)
+const configuredFrontend = process.env.FRONTEND_URL || process.env.CLIENT_URL;
+if (configuredFrontend) {
+  const customOrigins = configuredFrontend.split(',').map((u) => u.trim().replace(/\/+$/, ''));
+  customOrigins.forEach((orig) => {
+    if (orig && !allowedOrigins.includes(orig)) {
+      allowedOrigins.push(orig);
+    }
+  });
+}
+
+// Enable CORS for allowed origins with credentials
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    // Allow requests without Origin header (e.g. mobile apps, curl, server health checks)
+    if (!origin) {
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for unauthorized origin: ${origin}`));
+  },
   credentials: true,
 }));
 

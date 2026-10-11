@@ -26,6 +26,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import DailyProgressCard from '../components/DailyProgressCard';
 import WeeklyProgressChart from '../components/WeeklyProgressChart';
 import { progressService } from '../services/progressService';
+import { API_BASE_URL } from '../services/api';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -65,7 +66,7 @@ export default function DashboardPage() {
     try {
       setExporting(true);
       const token = localStorage.getItem('quizpilot_token');
-      const response = await fetch('/api/results/export', {
+      const response = await fetch(`${API_BASE_URL}/results/export`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

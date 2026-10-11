@@ -18,6 +18,7 @@ import {
 import { quizService } from '../services/quizService';
 import { DifficultyBadge, SourceBadge } from '../components/Badge';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { API_BASE_URL } from '../services/api';
 
 export default function QuizResultPage() {
   const { attemptId } = useParams();
@@ -52,7 +53,7 @@ export default function QuizResultPage() {
     try {
       setExporting(true);
       const token = localStorage.getItem('quizpilot_token');
-      const response = await fetch('/api/results/export', {
+      const response = await fetch(`${API_BASE_URL}/results/export`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

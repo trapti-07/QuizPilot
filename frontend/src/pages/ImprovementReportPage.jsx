@@ -27,6 +27,7 @@ import {
 import { analyticsService } from '../services/analyticsService';
 import MetricCard from '../components/MetricCard';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { API_BASE_URL } from '../services/api';
 
 export default function ImprovementReportPage() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export default function ImprovementReportPage() {
     try {
       setExporting(true);
       const token = localStorage.getItem('quizpilot_token');
-      const response = await fetch('/api/results/export-improvement', {
+      const response = await fetch(`${API_BASE_URL}/results/export-improvement`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
