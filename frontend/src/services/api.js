@@ -1,23 +1,26 @@
 import axios from 'axios';
 
 // Resolve API base URL:
-// - In production, uses import.meta.env.VITE_API_URL (e.g. deployed Render backend)
-// - In local development without VITE_API_URL, defaults to '/api' to use Vite dev proxy
-// - Automatically normalizes protocols, trailing slashes, and ensures '/api' is present exactly once
+// - If VITE_API_URL is configured (e.g., custom Render environment variable), uses that.
+// - In production builds without VITE_API_URL, automatically defaults to the deployed Render backend:
+//   https://quizpilot-1cdj.onrender.com/api
+// - In local development, defaults to '/api' to use Vite dev proxy
 export const resolveApiBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  if (!envUrl || !envUrl.trim()) {
-    return '/api';
+  if (envUrl && envUrl.trim()) {
+    let cleanUrl = envUrl.trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '');
+    if (!/^https?:\/\//i.test(cleanUrl) && !cleanUrl.startsWith('/')) {
+      cleanUrl = `https://${cleanUrl}`;
+    }
+    return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
   }
-  let cleanUrl = envUrl.trim().replace(/^["']|["']$/g, '').replace(/\/+$/, '');
-  if (!cleanUrl) {
-    return '/api';
+
+  // Fallback for live production deployment if VITE_API_URL was not set in Render dashboard
+  if (import.meta.env.PROD || (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')) {
+    return 'https://quizpilot-1cdj.onrender.com/api';
   }
-  // Ensure absolute protocol if host was specified without https://
-  if (!/^https?:\/\//i.test(cleanUrl) && !cleanUrl.startsWith('/')) {
-    cleanUrl = `https://${cleanUrl}`;
-  }
-  return cleanUrl.endsWith('/api') ? cleanUrl : `${cleanUrl}/api`;
+
+  return '/api';
 };
 
 export const API_BASE_URL = resolveApiBaseUrl();

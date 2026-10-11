@@ -35,13 +35,16 @@ const extractHost = (urlStr) => {
 };
 
 // Base allowed origins and hosts for local development
+// Base allowed origins and hosts for local development & deployed environments
 const allowedOrigins = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:3000',
   'http://127.0.0.1:3000',
+  'https://quizpilot-frontend.onrender.com',
+  'http://quizpilot-frontend.onrender.com',
 ]);
-const allowedHosts = new Set(['localhost', '127.0.0.1']);
+const allowedHosts = new Set(['localhost', '127.0.0.1', 'quizpilot-frontend.onrender.com']);
 
 // Allow deployed frontend origin via FRONTEND_URL or CLIENT_URL (supports comma-separated list)
 const configuredFrontend = process.env.FRONTEND_URL || process.env.CLIENT_URL;
@@ -68,7 +71,9 @@ const isOriginAllowed = (origin) => {
   if (allowedOrigins.has(cleanOrigin)) return true;
 
   const originHost = extractHost(cleanOrigin);
-  if (originHost && allowedHosts.has(originHost)) return true;
+  if (originHost && (allowedHosts.has(originHost) || originHost.endsWith('.onrender.com') || originHost.endsWith('.vercel.app'))) {
+    return true;
+  }
 
   return false;
 };
