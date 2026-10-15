@@ -6,6 +6,11 @@ const questionBankSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
+  standard: {
+    type: String,
+    default: 'Class 12',
+    index: true,
+  },
   unit: {
     type: String,
     required: true,

@@ -13,6 +13,10 @@ const answerSchema = new mongoose.Schema({
     type: String,
     default: 'General',
   },
+  options: {
+    type: [String],
+    default: [],
+  },
   selectedOption: {
     type: Number, // index 0, 1, 2, 3 or -1 for unattempted
     default: -1,

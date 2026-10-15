@@ -316,7 +316,7 @@ exports.getAttemptById = async (req, res) => {
     const attempt = await QuizAttempt.findOne({
       _id: req.params.attemptId,
       userId: req.user._id,
-    }).populate('quizId', 'title subject unit topic difficulty generationSource isAIGenerated');
+    }).populate('quizId', 'title subject unit topic difficulty generationSource isAIGenerated questions');
 
     if (!attempt) {
       return res.status(404).json({
@@ -325,9 +325,21 @@ exports.getAttemptById = async (req, res) => {
       });
     }
 
+    // Ensure all answers contain their options array (even for legacy attempts before schema update)
+    const enrichedAnswers = (attempt.answers || []).map((ans, idx) => {
+      const a = ans.toObject ? ans.toObject() : { ...ans };
+      if ((!a.options || a.options.length === 0) && attempt.quizId?.questions) {
+        const qObj = attempt.quizId.questions[a.questionIndex] || attempt.quizId.questions[idx];
+        if (qObj && Array.isArray(qObj.options)) {
+          a.options = qObj.options;
+        }
+      }
+      return a;
+    });
+
     // Calculate topic breakdown from answers
     const topicStats = {};
-    (attempt.answers || []).forEach(ans => {
+    enrichedAnswers.forEach(ans => {
       const t = ans.topic || attempt.unit || 'General';
       if (!topicStats[t]) topicStats[t] = { total: 0, correct: 0 };
       topicStats[t].total += 1;
@@ -367,7 +379,7 @@ exports.getAttemptById = async (req, res) => {
         timeTaken: attempt.timeTaken,
         pointsAwarded: attempt.pointsAwarded,
         completedAt: attempt.completedAt,
-        answers: attempt.answers,
+        answers: enrichedAnswers,
         topicBreakdown,
         revisionTopics,
       },

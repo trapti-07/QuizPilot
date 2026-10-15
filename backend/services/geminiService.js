@@ -46,19 +46,23 @@ class GeminiService {
 
     const targetDifficulty = difficulty === 'Adaptive' ? 'Medium' : difficulty;
 
-    const prompt = `You are QuizPilot, an expert AI exam preparation engine specializing in secondary and higher secondary Board Examination curricula (CBSE / State Boards).
-Generate exactly ${count} high-quality, authentic multiple-choice questions for the following requirements:
+    const prompt = `You are QuizPilot, an expert AI exam preparation engine strictly dedicated to Class 12 Board Examination curricula (CBSE Class 12 / State Boards Class 12).
+Generate exactly ${count} high-quality, authentic Class 12 Board multiple-choice questions for the following requirements:
+- Target Exam: Class 12 Board Examination (CBSE / State Boards)
+- Target Class: Class 12 ONLY
 - Subject: ${subject}
 - Unit / Chapter: ${unit}
 - Difficulty Level: ${targetDifficulty}
-${topic ? `- Specific Topic / Concept: ${topic}` : ''}
+${topic ? `- Specific Class 12 Topic / Concept: ${topic}` : ''}
 
 CRITICAL RULES:
-1. Each question must have exactly 4 plausible options.
-2. Only ONE option must be scientifically / mathematically correct according to the official board textbook syllabus.
-3. Provide a clear, step-by-step concise explanation for the correct answer.
-4. correctAnswer MUST BE an integer index (0, 1, 2, or 3) indicating which option in the options array is correct.
-5. Return ONLY a valid JSON array of objects. Do not wrap in markdown or any other commentary text.
+1. STRICT CLASS 12 CURRICULUM BOUNDARY: All questions MUST strictly belong to the official NCERT / CBSE Class 12 board examination syllabus. Under NO circumstances should questions from Class 9, Class 10, or Class 11 be generated.
+2. UNIT & TOPIC CONSISTENCY: Every question must strictly match the selected Class 12 Unit "${unit}"${topic ? ` and concept "${topic}"` : ''}. Do not introduce questions from other units or chapters.
+3. Each question must have exactly 4 plausible options.
+4. Only ONE option must be scientifically / mathematically correct according to the official Class 12 board textbook syllabus.
+5. Provide a clear, step-by-step concise explanation for the correct answer suitable for Class 12 board students.
+6. correctAnswer MUST BE an integer index (0, 1, 2, or 3) indicating which option in the options array is correct.
+7. Return ONLY a valid JSON array of objects. Do not wrap in markdown or any other commentary text.
 
 JSON Schema format:
 [
@@ -72,8 +76,8 @@ JSON Schema format:
   }
 ]`;
 
-    // Try primary recommended model: gemini-2.5-flash, fallback to gemini-1.5-flash or gemini-2.0-flash if needed
-    const candidateModels = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.0-flash'];
+    // Try primary recommended models: gemini-2.0-flash, gemini-1.5-flash
+    const candidateModels = ['gemini-2.0-flash', 'gemini-1.5-flash'];
     let lastError = null;
 
     for (const modelName of candidateModels) {

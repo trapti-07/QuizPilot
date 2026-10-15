@@ -377,22 +377,81 @@ export default function QuizResultPage() {
                   {ans.questionText}
                 </p>
 
+                {/* All Options Review List */}
+                {Array.isArray(ans.options) && ans.options.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    {ans.options.map((optText, optIdx) => {
+                      const isCorrectOpt = optIdx === ans.correctOption;
+                      const isSelectedOpt = optIdx === ans.selectedOption;
+
+                      let cardStyle = 'bg-white border-slate-200 text-slate-700';
+                      let letterStyle = 'bg-slate-100 text-slate-600';
+                      let statusBadge = null;
+
+                      if (isCorrectOpt) {
+                        cardStyle = 'bg-emerald-50/90 border-emerald-500 text-emerald-950 font-semibold shadow-xs';
+                        letterStyle = 'bg-emerald-600 text-white';
+                        statusBadge = (
+                          <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-200/70 px-2.5 py-0.5 rounded-lg shrink-0">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                            {isSelectedOpt ? 'Your Answer (Correct)' : 'Correct Answer'}
+                          </span>
+                        );
+                      } else if (isSelectedOpt) {
+                        cardStyle = 'bg-rose-50/90 border-rose-400 text-rose-950 font-semibold shadow-xs';
+                        letterStyle = 'bg-rose-600 text-white';
+                        statusBadge = (
+                          <span className="ml-auto inline-flex items-center gap-1 text-[11px] font-bold text-rose-800 bg-rose-200/70 px-2.5 py-0.5 rounded-lg shrink-0">
+                            <XCircle className="w-3.5 h-3.5 text-rose-700" />
+                            Your Wrong Answer
+                          </span>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={optIdx}
+                          className={`p-3 sm:p-3.5 rounded-xl border-2 transition-all flex items-start sm:items-center gap-3 text-xs sm:text-sm ${cardStyle}`}
+                        >
+                          <div className={`w-6 h-6 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 ${letterStyle}`}>
+                            {optLetters[optIdx]}
+                          </div>
+                          <span className="leading-relaxed flex-1">
+                            {optText}
+                          </span>
+                          {statusBadge}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
                 {/* Option summary */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className={`p-2.5 rounded-xl border font-medium ${
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  <div className={`p-3 rounded-xl border font-medium ${
                     isAnswered && !isCorrect
-                      ? 'bg-rose-50 border-rose-200 text-rose-900'
+                      ? 'bg-rose-50 border-rose-200 text-rose-950'
+                      : isCorrect
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
                       : 'bg-white border-slate-200 text-slate-600'
                   }`}>
                     <span className="font-bold">Your Answer: </span>
-                    {isAnswered
-                      ? `Option ${optLetters[ans.selectedOption]}`
-                      : 'None (Unattempted)'}
+                    {isAnswered ? (
+                      <span>
+                        <strong className="underline">Option {optLetters[ans.selectedOption]}</strong>
+                        {ans.options?.[ans.selectedOption] ? `: ${ans.options[ans.selectedOption]}` : ''}
+                      </span>
+                    ) : (
+                      'None (Unattempted)'
+                    )}
                   </div>
 
-                  <div className="p-2.5 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-900 font-medium">
+                  <div className="p-3 rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-950 font-medium">
                     <span className="font-bold">Correct Answer: </span>
-                    Option {optLetters[ans.correctOption]}
+                    <span>
+                      <strong className="underline">Option {optLetters[ans.correctOption]}</strong>
+                      {ans.options?.[ans.correctOption] ? `: ${ans.options[ans.correctOption]}` : ''}
+                    </span>
                   </div>
                 </div>
 
